@@ -92,9 +92,9 @@ class Body:
     drag = False
     def gravitay(self, other):
         r = (other.pos + -1*self.pos).magnitude()
-        #if r < self.radius + other.radius:
-        #    self.vel = -1 * self.vel
-        #    return 
+        if r < self.radius + other.radius:
+            self.vel = -1 * self.vel
+            return 
         mag = grav.val*self.mass*other.mass / r**2
         self.netF += mag * self.pos.get_pointing_unitvector(other.pos)
         
