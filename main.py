@@ -1,6 +1,7 @@
 import pygame
 import sys
 from math import log, ceil
+import random
 
 pygame.init()
 
@@ -93,7 +94,7 @@ class Body:
     def gravitay(self, other):
         r = (other.pos + -1*self.pos).magnitude()
         if r < self.radius + other.radius:
-            self.vel = -1 * self.vel
+            self.netF += -20 * (other.pos + -1 * self.pos)
             return 
         mag = grav.val*self.mass*other.mass / r**2
         self.netF += mag * self.pos.get_pointing_unitvector(other.pos)
@@ -129,11 +130,15 @@ class Body:
 def main():
     global timestop
     running = True
-
-    earth = Body(color=(0, 0, 255), pos=Vec2(0, 0), radius=63, mass=50)
-    moon = Body(color=WHITE, pos=Vec2(38, 0), radius=17, mass=74)
-    boon = Body(color=(0, 255, 0), pos=Vec2(-12, 0), radius=27, mass=63)
-    bodies = [earth, moon, boon]
+    random.seed(3)
+    #earth = Body(color=(0, 0, 255), pos=Vec2(0, 0), radius=63, mass=500)
+    #moon = Body(color=WHITE, pos=Vec2(38, 0), radius=17, mass=74)
+    #boon = Body(color=(0, 255, 0), pos=Vec2(-12, 0), radius=27, mass=63)
+    bodies = []
+    rancol = lambda: (random.randint(1,250), random.randint(1,250), random.randint(1,250))
+    for i in range(200):
+        r = random.random()*0.2+0.1
+        bodies.append(Body(color=rancol(), pos=SCREEN_HEIGHT * Vec2(random.random()-0.5, random.random()-0.5), radius=r*25, mass=r*100))
 
     while running:
         # Event handling
@@ -154,22 +159,18 @@ def main():
 
 
         # Game logic goes here
-        earth.gravitay(moon)
-        earth.gravitay(boon)
-        moon.gravitay(earth)
-        moon.gravitay(boon)
-        boon.gravitay(earth)
-        boon.gravitay(moon)
-        earth.movement_update()
-        moon.movement_update()
-        boon.movement_update()
+        for body in bodies:
+            for otherbody in bodies:
+                body.gravitay(otherbody)
+        for body in bodies:
+            body.movement_update()
         # Clear the screen
         screen.fill(BLACK)
 
         # Drawing code goes here
-        earth.draw()
-        moon.draw()
-        boon.draw()
+        for body in bodies:
+            body.draw()
+
         grav.draw()
         timespeed.draw()
         # Update the display
